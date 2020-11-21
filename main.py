@@ -61,6 +61,7 @@ def main():
         else:
             print(key + ' - ' + str(value))
 
+
 def add_to_totals(cat: str):
     # check if cat already exists
     # if yes - increase current value by 1
