@@ -1,12 +1,21 @@
 import re
+import os
 import argparse
 
-parser = argparse.ArgumentParser(description='Extract SD stats from file')
-
-parser.add_argument('input_file', type=str, help='The file to parse')
-args = parser.parse_args()
-
 audit_totals = {}
+
+
+def text_file(file_name):
+    base, ext = os.path.splitext(file_name)
+    if ext.lower() not in '.txt':
+        raise argparse.ArgumentTypeError('File must have .txt extension')
+    else:
+        return file_name
+
+
+parser = argparse.ArgumentParser(description='Extract SD stats from file')
+parser.add_argument('input_file', type=text_file, help='The file to parse')
+args = parser.parse_args()
 
 
 def main():
@@ -53,14 +62,15 @@ def main():
             print(key + ' - ' + str(value))
 
 def add_to_totals(cat: str):
-    #check if cat already exists
-    #if yes - increase current value by 1
-    #if no - add to dict with a value of 1
+    # check if cat already exists
+    # if yes - increase current value by 1
+    # if no - add to dict with a value of 1
 
     if cat in audit_totals.keys():
         audit_totals[cat] += 1
     else:
         audit_totals[cat] = 1
+
 
 if __name__ == '__main__':
     main()
