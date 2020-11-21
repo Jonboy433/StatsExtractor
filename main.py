@@ -1,9 +1,16 @@
 import re
+import argparse
+
+parser = argparse.ArgumentParser(description='Extract SD stats from file')
+
+parser.add_argument('input_file', type=str, help='The file to parse')
+args = parser.parse_args()
 
 audit_totals = {}
 
+
 def main():
-    print("reading from file ServiceDeskReport.txt..")
+    print("reading from file {}".format(args.input_file))
 
     regex_request = re.compile('Request: (?P<RequestID>[0-9]{8})', re.IGNORECASE)
     regex_audit = re.compile(r'Property:(\s*)Audit Category(\s*)(?P<AuditCat>.*)', re.IGNORECASE)
@@ -12,7 +19,7 @@ def main():
     regex_assignee = re.compile(r'Assignee:(\s*)(?P<Assignee>.*?)(\s*)SLA',re.IGNORECASE)
     regex_end = re.compile('ADP_15_Days_Event_for_Netcool.*', re.IGNORECASE)
 
-    with open("ServiceDeskReport.txt","r",encoding='utf-8') as inputFile, open('results.csv','w') as results:
+    with open(args.input_file, "r", encoding='utf-8') as inputFile, open('results.csv', 'w') as results:
         results.write('Ticket,Status,Assignee,Open Date,Audit Category\n')
         for line in inputFile:
             req = regex_request.match(line)
