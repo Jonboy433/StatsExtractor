@@ -19,32 +19,32 @@ def main():
     regex_assignee = re.compile(r'Assignee:(\s*)(?P<Assignee>.*?)(\s*)SLA',re.IGNORECASE)
     regex_end = re.compile('ADP_15_Days_Event_for_Netcool.*', re.IGNORECASE)
 
-    with open(args.input_file, "r", encoding='utf-8') as inputFile, open('results.csv', 'w') as results:
-        results.write('Ticket,Status,Assignee,Open Date,Audit Category\n')
-        for line in inputFile:
-            req = regex_request.match(line)
-            cat = regex_audit.match(line)
-            status = regex_status.match(line)
-            date = regex_open.match(line)
-            assignee = regex_assignee.match(line)
-            end = regex_end.match(line)
+    try:
+        with open(args.input_file, "r", encoding='utf-8') as inputFile, open('results.csv', 'w') as results:
+            results.write('Ticket,Status,Assignee,Open Date,Audit Category\n')
+            for line in inputFile:
+                req = regex_request.match(line)
+                cat = regex_audit.match(line)
+                status = regex_status.match(line)
+                date = regex_open.match(line)
+                assignee = regex_assignee.match(line)
+                end = regex_end.match(line)
 
-            if req:
-                results.write(req.group("RequestID") + ',')
-            if status:
-                results.write(status.group("Status") + ',')
-            if assignee:
-                results.write("\"" + assignee.group("Assignee") + "\",")
-            if date:
-                results.write(date.group("OpenDate") + ',')
-            if cat:
-                results.write(cat.group("AuditCat"))
-                add_to_totals(cat.group("AuditCat"))
-            if end:
-                results.write('\n')
-
-    if inputFile.closed:
-        print("Done")
+                if req:
+                    results.write(req.group("RequestID") + ',')
+                if status:
+                    results.write(status.group("Status") + ',')
+                if assignee:
+                    results.write("\"" + assignee.group("Assignee") + "\",")
+                if date:
+                    results.write(date.group("OpenDate") + ',')
+                if cat:
+                    results.write(cat.group("AuditCat"))
+                    add_to_totals(cat.group("AuditCat"))
+                if end:
+                    results.write('\n')
+    except FileNotFoundError:
+        print('Unable to find {} in the current directory'.format(args.input_file))
 
     for key, value in sorted(audit_totals.items()):
         if key == '-':
