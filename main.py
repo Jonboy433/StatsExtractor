@@ -1,5 +1,6 @@
 import re
 import os
+import datetime
 import argparse
 
 audit_totals = {}
@@ -29,7 +30,7 @@ def main():
     regex_end = re.compile('ADP_15_Days_Event_for_Netcool.*', re.IGNORECASE)
 
     try:
-        with open(args.input_file, "r", encoding='utf-8') as inputFile, open('results.csv', 'w') as results:
+        with open(args.input_file, "r", encoding='utf-8') as inputFile, open(get_output_file_name(), 'w') as results:
             results.write('Ticket,Status,Assignee,Open Date,Audit Category\n')
             for line in inputFile:
                 req = regex_request.match(line)
@@ -55,12 +56,20 @@ def main():
     except FileNotFoundError:
         print('Unable to find {} in the current directory'.format(args.input_file))
 
+    print('Parse complete. Generated {}'.format(get_output_file_name()))
+
     for key, value in sorted(audit_totals.items()):
         if key == '-':
             print('N/A - ' + str(value))
         else:
             print(key + ' - ' + str(value))
 
+
+def get_output_file_name() -> str:
+    output_file = os.path.splitext(args.input_file)[0] + '_results_' + str(datetime.datetime.now().month) \
+                  + str(datetime.datetime.now().day) + '.csv'
+
+    return output_file
 
 def add_to_totals(cat: str):
     # check if cat already exists
