@@ -20,6 +20,7 @@ args = parser.parse_args()
 
 
 def main():
+    total_ticket_count = 0
     print("reading from file {}".format(args.input_file))
 
     regex_request = re.compile('Request: (?P<RequestID>[0-9]{8})', re.IGNORECASE)
@@ -52,11 +53,12 @@ def main():
                     results.write(cat.group("AuditCat"))
                     add_to_totals(cat.group("AuditCat"))
                 if end:
+                    total_ticket_count += 1
                     results.write('\n')
     except FileNotFoundError:
         print('Unable to find {} in the current directory'.format(args.input_file))
 
-    print('Parse complete. Generated {}'.format(get_output_file_name()))
+    print('Parsed {} tickets. Generated {}'.format(total_ticket_count, get_output_file_name()))
 
     for key, value in sorted(audit_totals.items()):
         if key == '-':
@@ -70,6 +72,7 @@ def get_output_file_name() -> str:
                   + str(datetime.datetime.now().day) + '.csv'
 
     return output_file
+
 
 def add_to_totals(cat: str):
     # check if cat already exists
