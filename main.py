@@ -68,8 +68,8 @@ def main():
 
 
 def get_output_file_name() -> str:
-    output_file = os.path.splitext(args.input_file)[0] + '_results_' + str(datetime.datetime.now().month) \
-                  + str(datetime.datetime.now().day) + '.csv'
+    output_file = os.path.splitext(args.input_file)[0] + '_results_' + f"{datetime.datetime.now():%m}" \
+                  + f"{datetime.datetime.now():%d}" + '.csv'
 
     return output_file
 
