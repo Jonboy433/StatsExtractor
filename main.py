@@ -1,6 +1,7 @@
 import re
 import os
 import datetime
+import calendar
 import argparse
 
 audit_totals = {}
@@ -31,7 +32,7 @@ def main():
     regex_end = re.compile('ADP_15_Days_Event_for_Netcool.*', re.IGNORECASE)
 
     try:
-        with open(args.input_file, "r", encoding='utf-8') as inputFile, open(get_output_file_name(), 'w') as results:
+        with open(args.input_file, "r", encoding='utf-8') as inputFile, open(get_detail_output_file_name(), 'w') as results:
             results.write('Ticket,Status,Assignee,Open Date,Audit Category\n')
             for line in inputFile:
                 req = regex_request.match(line)
@@ -58,23 +59,39 @@ def main():
     except FileNotFoundError:
         print('Unable to find {} in the current directory'.format(args.input_file))
 
-    print('Parsed {} tickets. Generated {}'.format(total_ticket_count, get_output_file_name()))
+    print('Parsed {} tickets.\nGenerated output files {} and {}'.format(total_ticket_count, get_detail_output_file_name(), get_stats_output_file_name()))
 
-    for key, value in sorted(audit_totals.items()):
-        if key == '-':
-            print('N/A - ' + str(value))
-        else:
-            print(key + ' - ' + str(value))
+    compile_stats(audit_totals.items())
 
 
-def get_output_file_name() -> str:
-    output_file = os.path.splitext(args.input_file)[0] + '_results_' + f"{datetime.datetime.now():%m}" \
+def compile_stats(totals: dict) -> None:
+    with open(get_stats_output_file_name(), 'w') as stats:
+        stats.write('Category,Count\n')
+        for key, value in sorted(totals):
+            if key == '-':
+                stats.write('N/A,' + str(value))
+                print('N/A - ' + str(value))
+            else:
+                stats.write(key + ',' + str(value))
+                print(key + ' - ' + str(value))
+            stats.write('\n')
+
+
+def get_detail_output_file_name() -> str:
+    output_details_file = os.path.splitext(args.input_file)[0] + '_results_' + f"{datetime.datetime.now():%m}" \
                   + f"{datetime.datetime.now():%d}" + '.csv'
 
-    return output_file
+    return output_details_file
 
 
-def add_to_totals(cat: str):
+def get_stats_output_file_name() -> str:
+    # For now it prints the month when you run it. Need to make it read month from input list
+    output_stats_file = 'ServiceDeskStats_' + calendar.month_name[datetime.datetime.now().month][:3] + str(datetime.datetime.now().year) + '.csv'
+
+    return output_stats_file
+
+
+def add_to_totals(cat: str) -> None:
     # check if cat already exists
     # if yes - increase current value by 1
     # if no - add to dict with a value of 1
