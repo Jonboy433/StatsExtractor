@@ -5,6 +5,7 @@ import calendar
 import argparse
 
 audit_totals = {}
+months_in_input = set()
 
 
 def text_file(file_name):
@@ -50,6 +51,8 @@ def main():
                     results.write("\"" + assignee.group("Assignee") + "\",")
                 if date:
                     results.write(date.group("OpenDate") + ',')
+                    # add to month set
+                    add_month_to_set(int(date.group("OpenDate")[:2]))
                 if cat:
                     results.write(cat.group("AuditCat"))
                     add_to_totals(cat.group("AuditCat"))
@@ -77,6 +80,16 @@ def compile_stats(totals: dict) -> None:
             stats.write('\n')
 
 
+def add_month_to_set(month: int) -> None:
+    months_in_input.add(month)
+
+
+def get_month() -> str:
+    # Take the month from the earliest ticket and use that for naming output file
+    month_list = sorted(list(months_in_input))
+    return calendar.month_name[month_list[0]][:3]
+
+
 def get_detail_output_file_name() -> str:
     output_details_file = os.path.splitext(args.input_file)[0] + '_results_' + f"{datetime.datetime.now():%m}" \
                   + f"{datetime.datetime.now():%d}" + '.csv'
@@ -86,7 +99,7 @@ def get_detail_output_file_name() -> str:
 
 def get_stats_output_file_name() -> str:
     # For now it prints the month when you run it. Need to make it read month from input list
-    output_stats_file = 'ServiceDeskStats_' + calendar.month_name[datetime.datetime.now().month][:3] + str(datetime.datetime.now().year) + '.csv'
+    output_stats_file = 'ServiceDeskStats_' + get_month() + str(datetime.datetime.now().year) + '.csv'
 
     return output_stats_file
 
