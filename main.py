@@ -29,8 +29,7 @@ def main():
     regex_audit = re.compile(r'Property:(\s*)Audit Category(\s*)(?P<AuditCat>.*)', re.IGNORECASE)
     regex_status = re.compile(r'Status:(\s*)(?P<Status>.*?)(\s)(Active|Inactive)', re.IGNORECASE)
     regex_open = re.compile(r'Open Date:(\s*)(?P<OpenDate>.*?)(\s*)Close Date', re.IGNORECASE)
-    regex_assignee = re.compile(r'Assignee:(\s*)(?P<Assignee>.*?)(\s*)SLA',re.IGNORECASE)
-    regex_end = re.compile('ADP_15_Days_Event_for_Netcool.*', re.IGNORECASE)
+    regex_assignee = re.compile(r'Assignee:(\s*)(?P<Assignee>.*?)(\s*)SLA', re.IGNORECASE)
 
     try:
         with open(args.input_file, "r", encoding='utf-8') as inputFile, open(get_detail_output_file_name(), 'w') as results:
@@ -41,10 +40,10 @@ def main():
                 status = regex_status.match(line)
                 date = regex_open.match(line)
                 assignee = regex_assignee.match(line)
-                end = regex_end.match(line)
 
                 if req:
                     results.write(req.group("RequestID") + ',')
+                    total_ticket_count += 1
                 if status:
                     results.write(status.group("Status") + ',')
                 if assignee:
@@ -56,9 +55,9 @@ def main():
                 if cat:
                     results.write(cat.group("AuditCat"))
                     add_to_totals(cat.group("AuditCat"))
-                if end:
-                    total_ticket_count += 1
                     results.write('\n')
+
+
     except FileNotFoundError:
         print('Unable to find {} in the current directory'.format(args.input_file))
 
@@ -98,7 +97,6 @@ def get_detail_output_file_name() -> str:
 
 
 def get_stats_output_file_name() -> str:
-    # For now it prints the month when you run it. Need to make it read month from input list
     output_stats_file = 'ServiceDeskStats_' + get_month() + str(datetime.datetime.now().year) + '.csv'
 
     return output_stats_file
