@@ -3,6 +3,7 @@ import os
 import datetime
 import calendar
 import argparse
+import xlsxwriter
 
 audit_totals = {}
 months_in_input = set()
@@ -25,6 +26,10 @@ def main():
     total_ticket_count = 0
     print("reading from file {}".format(args.input_file))
 
+    # create new xlsx file
+    workbook = xlsxwriter.Workbook('test.xlsx')
+    worksheet = workbook.add_worksheet('SD Details')
+
     regex_request = re.compile('Request: (?P<RequestID>[0-9]{8})', re.IGNORECASE)
     regex_audit = re.compile(r'Property:(\s*)Audit Category(\s*)(?P<AuditCat>.*)', re.IGNORECASE)
     regex_status = re.compile(r'Status:(\s*)(?P<Status>.*?)(\s)(Active|Inactive)', re.IGNORECASE)
@@ -33,7 +38,17 @@ def main():
 
     try:
         with open(args.input_file, "r", encoding='utf-8') as inputFile, open(get_detail_output_file_name(), 'w') as results:
+
+            # start with row 0, col 0
+            row = 0
+            col = 0
+            header = ['Ticket','Status','Assignee','Open Date','Audit Category']
+            for item in header:
+                worksheet.write(row, col, item)
+                col += 1
+
             results.write('Ticket,Status,Assignee,Open Date,Audit Category\n')
+
             for line in inputFile:
                 req = regex_request.match(line)
                 cat = regex_audit.match(line)
@@ -42,21 +57,31 @@ def main():
                 assignee = regex_assignee.match(line)
 
                 if req:
+                    row += 1
+                    col = 0
                     results.write(req.group("RequestID") + ',')
+                    add_to_worksheet(worksheet, row, col, req.group("RequestID"))
                     total_ticket_count += 1
                 if status:
+                    col = 1
                     results.write(status.group("Status") + ',')
+                    add_to_worksheet(worksheet, row, col, status.group("Status"))
                 if assignee:
+                    col = 2
                     results.write("\"" + assignee.group("Assignee") + "\",")
+                    add_to_worksheet(worksheet, row, col, assignee.group("Assignee"))
                 if date:
+                    col = 3
                     results.write(date.group("OpenDate") + ',')
+                    add_to_worksheet(worksheet, row, col, date.group("OpenDate"))
                     # add to month set
                     add_month_to_set(int(date.group("OpenDate")[:2]))
                 if cat:
+                    col = 4
                     results.write(cat.group("AuditCat"))
+                    add_to_worksheet(worksheet, row, col, cat.group("AuditCat"))
                     add_to_totals(cat.group("AuditCat"))
                     results.write('\n')
-
 
     except FileNotFoundError:
         print('Unable to find {} in the current directory'.format(args.input_file))
@@ -64,6 +89,9 @@ def main():
     print('Parsed {} tickets.\nGenerated output files {} and {}'.format(total_ticket_count, get_detail_output_file_name(), get_stats_output_file_name()))
 
     compile_stats(audit_totals.items())
+
+    # close the xlsx file
+    workbook.close()
 
 
 def compile_stats(totals: dict) -> None:
@@ -102,6 +130,12 @@ def get_stats_output_file_name() -> str:
     return output_stats_file
 
 
+def get_xlsx_output_file_name() -> str:
+    output_xlsx_file = 'ServiceDeskReport_' + get_month() + str(datetime.datetime.now().year) + '.xlsx'
+
+    return output_xlsx_file
+
+
 def add_to_totals(cat: str) -> None:
     # check if cat already exists
     # if yes - increase current value by 1
@@ -111,6 +145,10 @@ def add_to_totals(cat: str) -> None:
         audit_totals[cat] += 1
     else:
         audit_totals[cat] = 1
+
+
+def add_to_worksheet(sheet: xlsxwriter.worksheet.Worksheet, row: int, col: int, val: str) -> None:
+    sheet.write(row, col, val)
 
 
 if __name__ == '__main__':
