@@ -27,7 +27,7 @@ def main():
     print("reading from file {}".format(args.input_file))
 
     # create new xlsx file
-    workbook = xlsxwriter.Workbook('test.xlsx')
+    workbook = xlsxwriter.Workbook('ServiceDeskReport.xlsx')
     worksheet = workbook.add_worksheet('SD Details')
 
     regex_request = re.compile('Request: (?P<RequestID>[0-9]{8})', re.IGNORECASE)
