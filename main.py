@@ -26,9 +26,17 @@ def main():
     total_ticket_count = 0
     print("reading from file {}".format(args.input_file))
 
-    # create new xlsx file
+    # create new xlsx file and setup some basic formatting
     workbook = xlsxwriter.Workbook('ServiceDeskReport.xlsx')
     worksheet = workbook.add_worksheet('SD Details')
+    worksheet.set_column('A1:A1', 10)
+    worksheet.set_column('B1:B1', 12)
+    worksheet.set_column('C1:C1', 25)
+    worksheet.set_column('D1:D1', 23)
+    worksheet.set_column('E1:E1', 30)
+    bold = workbook.add_format({'bold': 1})
+    worksheet.set_row(0, 16, bold)
+    worksheet.autofilter('E1:E1000')
 
     regex_request = re.compile('Request: (?P<RequestID>[0-9]{8})', re.IGNORECASE)
     regex_audit = re.compile(r'Property:(\s*)Audit Category(\s*)(?P<AuditCat>.*)', re.IGNORECASE)
