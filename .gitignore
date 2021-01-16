@@ -3,3 +3,4 @@ venv./
 *.txt
 *.csv
 *.xlsx
+!requirements.txt
