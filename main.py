@@ -5,9 +5,6 @@ import calendar
 import argparse
 import xlsxwriter
 
-audit_totals = {}
-months_in_input = set()
-
 
 def text_file(file_name):
     base, ext = os.path.splitext(file_name)
@@ -21,22 +18,25 @@ parser = argparse.ArgumentParser(description='Extract SD stats from file')
 parser.add_argument('input_file', type=text_file, help='The file to parse')
 args = parser.parse_args()
 
+audit_totals = {}
+months_in_input = set()
+
+# create new xlsx file and setup some basic formatting
+workbook = xlsxwriter.Workbook('ServiceDeskReport.xlsx')
+worksheet = workbook.add_worksheet('SD Details')
+worksheet.set_column('A1:A1', 10)
+worksheet.set_column('B1:B1', 12)
+worksheet.set_column('C1:C1', 25)
+worksheet.set_column('D1:D1', 23)
+worksheet.set_column('E1:E1', 30)
+bold = workbook.add_format({'bold': 1})
+worksheet.set_row(0, 16, bold)
+worksheet.autofilter('E1:E1000')
+
 
 def main():
     total_ticket_count = 0
     print("reading from file {}".format(args.input_file))
-
-    # create new xlsx file and setup some basic formatting
-    workbook = xlsxwriter.Workbook('ServiceDeskReport.xlsx')
-    worksheet = workbook.add_worksheet('SD Details')
-    worksheet.set_column('A1:A1', 10)
-    worksheet.set_column('B1:B1', 12)
-    worksheet.set_column('C1:C1', 25)
-    worksheet.set_column('D1:D1', 23)
-    worksheet.set_column('E1:E1', 30)
-    bold = workbook.add_format({'bold': 1})
-    worksheet.set_row(0, 16, bold)
-    worksheet.autofilter('E1:E1000')
 
     regex_request = re.compile('Request: (?P<RequestID>[0-9]{8})', re.IGNORECASE)
     regex_audit = re.compile(r'Property:(\s*)Audit Category(\s*)(?P<AuditCat>.*)', re.IGNORECASE)
@@ -108,11 +108,27 @@ def compile_stats(totals: dict) -> None:
         for key, value in sorted(totals):
             if key == '-':
                 stats.write('N/A,' + str(value))
-                print('N/A - ' + str(value))
             else:
                 stats.write(key + ',' + str(value))
-                print(key + ' - ' + str(value))
             stats.write('\n')
+
+    worksheet = workbook.add_worksheet('SD Stats')
+    worksheet.set_column('A1:A1', 30)
+    row = 0
+    worksheet.write(row, 0, 'Category')
+    worksheet.write(row, 1, 'Count')
+    row += 1
+    for key, value in sorted(totals):
+        if key == '-':
+            worksheet.write(row, 0, 'N/A')
+            worksheet.write(row, 1, str(value))
+            print('N/A - ' + str(value))
+        else:
+            worksheet.write(row, 0, key)
+            worksheet.write(row, 1, str(value))
+            print(key + ' - ' + str(value))
+        row += 1
+
 
 
 def add_month_to_set(month: int) -> None:
