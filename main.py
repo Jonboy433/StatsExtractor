@@ -83,7 +83,10 @@ def main():
                     results.write(date.group("OpenDate") + ',')
                     add_to_worksheet(worksheet, row, col, date.group("OpenDate"))
                     # add to month set
-                    add_month_to_set(int(date.group("OpenDate")[:2]))
+                    try:
+                        add_month_to_set(int(date.group("OpenDate")[:2]))
+                    except ValueError:
+                        add_month_to_set(int(date.group("OpenDate")[:2]))
                 if cat:
                     col = 4
                     results.write(cat.group("AuditCat"))
