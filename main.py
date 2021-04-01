@@ -128,7 +128,7 @@ def compile_stats(totals: dict) -> None:
             print('N/A - ' + str(value))
         else:
             worksheet.write(row, 0, key)
-            worksheet.write(row, 1, str(value))
+            worksheet.write(row, 1, value)
             print(key + ' - ' + str(value))
         row += 1
 
