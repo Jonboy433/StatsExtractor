@@ -86,7 +86,7 @@ def main():
                     try:
                         add_month_to_set(int(date.group("OpenDate")[:2]))
                     except ValueError:
-                        add_month_to_set(int(date.group("OpenDate")[:2]))
+                        add_month_to_set(int(date.group("OpenDate")[:1]))
                 if cat:
                     col = 4
                     results.write(cat.group("AuditCat"))
