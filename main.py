@@ -184,7 +184,10 @@ def get_xlsx_output_file_name() -> str:
 
 
 def get_top_level_category(cat: str) -> str:
-    return audit_map[cat]
+    try:
+        return audit_map[cat]
+    except KeyError as k:
+        print('Unable to process ticket with category: {0}'.format(k))
 
 
 def add_to_totals(cat: str) -> None:

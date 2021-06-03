@@ -51,7 +51,7 @@ audit_map = {
     'SSR - SIV Issue': 'SSR',
     'SSR - Socure': 'SSR',
     'StepUp - Audit': 'Audit',
-    'StepUp - OTP not rec''d': 'Step Up',
+    'StepUp - OTP not rec\'d': 'Step Up',
     'Utility - BulkAssociateUpdate': 'Utility',
     'Utility - Delete AZSchema': 'Utility',
     'Utility - Product/Profile': 'Utility',
