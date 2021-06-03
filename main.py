@@ -4,6 +4,7 @@ import datetime
 import calendar
 import argparse
 import xlsxwriter
+from mapping import audit_map
 
 
 def text_file(file_name):
@@ -19,6 +20,7 @@ parser.add_argument('input_file', type=text_file, help='The file to parse')
 args = parser.parse_args()
 
 audit_totals = {}
+audit_totals_top = {}
 months_in_input = set()
 
 # create new xlsx file and setup some basic formatting
@@ -99,6 +101,7 @@ def main():
 
     print('Parsed {} tickets.\nGenerated output files {} and {}'.format(total_ticket_count, get_detail_output_file_name(), get_stats_output_file_name()))
 
+    # compile stats
     compile_stats(audit_totals.items())
 
     # close the xlsx file
@@ -121,7 +124,25 @@ def compile_stats(totals: dict) -> None:
     worksheet.write(row, 0, 'Category')
     worksheet.write(row, 1, 'Count')
     row += 1
-    for key, value in sorted(totals):
+    for key, value in sorted(totals, key=lambda x: x[1], reverse=True):
+        if key == '-':
+            worksheet.write(row, 0, 'N/A')
+            worksheet.write(row, 1, value)
+            print('N/A - ' + str(value))
+        else:
+            worksheet.write(row, 0, key)
+            worksheet.write(row, 1, value)
+            print(key + ' - ' + str(value))
+        row += 1
+
+    # add the top level stats as well
+    worksheet = workbook.add_worksheet('SD Stats - Top Level')
+    worksheet.set_column('A1:A1', 30)
+    row = 0
+    worksheet.write(row, 0, 'Category')
+    worksheet.write(row, 1, 'Count')
+    row += 1
+    for key, value in sorted(audit_totals_top.items(), key=lambda x: x[1], reverse=True):
         if key == '-':
             worksheet.write(row, 0, 'N/A')
             worksheet.write(row, 1, str(value))
@@ -131,7 +152,6 @@ def compile_stats(totals: dict) -> None:
             worksheet.write(row, 1, value)
             print(key + ' - ' + str(value))
         row += 1
-
 
 
 def add_month_to_set(month: int) -> None:
@@ -163,15 +183,23 @@ def get_xlsx_output_file_name() -> str:
     return output_xlsx_file
 
 
+def get_top_level_category(cat: str) -> str:
+    return audit_map[cat]
+
+
 def add_to_totals(cat: str) -> None:
     # check if cat already exists
     # if yes - increase current value by 1
     # if no - add to dict with a value of 1
-
     if cat in audit_totals.keys():
         audit_totals[cat] += 1
     else:
         audit_totals[cat] = 1
+
+    if get_top_level_category(cat) in audit_totals_top.keys():
+        audit_totals_top[get_top_level_category(cat)] += 1
+    else:
+        audit_totals_top[get_top_level_category(cat)] = 1
 
 
 def add_to_worksheet(sheet: xlsxwriter.worksheet.Worksheet, row: int, col: int, val: str) -> None:
