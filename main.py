@@ -146,11 +146,17 @@ def compile_stats(totals: dict) -> None:
         if key == '-':
             worksheet.write(row, 0, 'N/A')
             worksheet.write(row, 1, str(value))
-            print('N/A - ' + str(value))
+            try:
+                print('N/A - ' + str(value))
+            except TypeError as t:
+                print('Unable to process record... {0}'.format(t))
         else:
             worksheet.write(row, 0, key)
             worksheet.write(row, 1, value)
-            print(key + ' - ' + str(value))
+            try:
+                print(key + ' - ' + str(value))
+            except TypeError as t:
+                print('Unable to process record... {0}'.format(t))
         row += 1
 
 
@@ -185,7 +191,7 @@ def get_xlsx_output_file_name() -> str:
 
 def get_top_level_category(cat: str) -> str:
     try:
-        return audit_map[cat]
+        return audit_map[cat.upper()]
     except KeyError as k:
         print('Unable to process ticket with category: {0}'.format(k))
 
