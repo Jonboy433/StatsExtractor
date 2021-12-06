@@ -29,6 +29,7 @@ audit_map = {
     'FEDERATION - CERT UPDATE': 'Federation',
     'FEDERATION - LOGIN ISSUE': 'Federation',
     'FEDERATION - MOBILE': 'Federation',
+    'FEDERATION - NEW SETUP': 'Federation',
     'FEDERATION - SETUP ISSUE': 'Federation',
     'FEDERATION - DEPROV': 'Federation',
     'FEDERATION - PID UPDATE': 'Federation',
