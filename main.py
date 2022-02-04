@@ -217,4 +217,3 @@ def add_to_worksheet(sheet: xlsxwriter.worksheet.Worksheet, row: int, col: int, 
 
 if __name__ == '__main__':
     main()
-## test
